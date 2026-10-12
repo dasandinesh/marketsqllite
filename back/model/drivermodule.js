@@ -20,6 +20,6 @@ const driverSchema = new mongoose.Schema({
 
 driverSchema.index({ name: 1 });
 
-const DriverModel = mongoose.model('Driver', driverSchema);
+const DriverModel = require('../storage/model')('Driver', driverSchema);
 
 module.exports = DriverModel;

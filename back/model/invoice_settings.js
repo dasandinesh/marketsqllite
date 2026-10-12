@@ -16,7 +16,7 @@ const invoice_settingSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 // Default global model (legacy)
-const Invoice_settingModel = mongoose.model('Invoice_setting', invoice_settingSchema);
+const Invoice_settingModel = require('../storage/model')('Invoice_setting', invoice_settingSchema);
 
 
 module.exports = Invoice_settingModel;

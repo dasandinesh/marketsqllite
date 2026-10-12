@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const storage = require('../storage');
 const { EJSON } = require('bson');
 
 const SYSTEM_PREFIX = 'system.';
@@ -8,14 +8,16 @@ const SYSTEM_PREFIX = 'system.';
 // download + later restore, instead of degrading into plain strings via JSON.stringify.
 exports.downloadBackup = async (req, res) => {
   try {
-    const db = mongoose.connection.db;
+    const db = storage.localDb();
     if (!db) return res.status(503).json({ error: 'Database is not connected.' });
 
-    const collectionInfos = await db.listCollections().toArray();
-    const dump = {};
-    for (const { name } of collectionInfos) {
-      if (name.startsWith(SYSTEM_PREFIX)) continue;
-      dump[name] = await db.collection(name).find({}).toArray();
+    const dump = storage.engine() === 'sqlite' ? await require('../storage/sqlite').getStore().exportBusiness() : {};
+    if (storage.engine() !== 'sqlite') {
+      const collectionInfos = await db.listCollections().toArray();
+      for (const { name } of collectionInfos) {
+        if (name.startsWith(SYSTEM_PREFIX)) continue;
+        dump[name] = await db.collection(name).find({}).toArray();
+      }
     }
 
     const payload = {
@@ -43,7 +45,7 @@ exports.downloadBackup = async (req, res) => {
 // $oid / $date markers survive as real ObjectId / Date instances on insert.
 exports.restoreBackup = async (req, res) => {
   try {
-    const db = mongoose.connection.db;
+    const db = storage.localDb();
     if (!db) return res.status(503).json({ error: 'Database is not connected.' });
 
     if (typeof req.body !== 'string' || !req.body.trim()) {
@@ -63,6 +65,12 @@ exports.restoreBackup = async (req, res) => {
     }
 
     const summary = [];
+    if (storage.engine() === 'sqlite') {
+      const allowed = new Set(require('../atlas-sync/service').COLLECTIONS);
+      if (Object.entries(collections).some(([name, docs]) => !allowed.has(name) || !Array.isArray(docs))) {
+        return res.status(400).json({ error: 'Backup contains unknown collections or invalid record lists. Nothing was restored.' });
+      }
+    }
     for (const [name, docs] of Object.entries(collections)) {
       if (!Array.isArray(docs)) continue;
       const collection = db.collection(name);
@@ -76,3 +84,25 @@ exports.restoreBackup = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+exports.downloadSQLite = async (req, res) => {
+  if (storage.engine() !== 'sqlite') return res.status(400).json({ error: 'This download is available in SQLite mode.' });
+  const fs = require('node:fs');
+  const os = require('node:os');
+  const path = require('node:path');
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'market-sqlite-backup-'));
+  const filename = path.join(directory, 'market.sqlite');
+  const cleanup = () => {
+    fs.rmSync(filename, { force: true });
+    fs.rmdirSync(directory);
+  };
+  try {
+    await require('../storage/sqlite').getStore().backup(filename);
+    res.download(filename, `market-${new Date().toISOString().replace(/[:.]/g, '-')}.sqlite`, () => cleanup());
+  } catch {
+    cleanup();
+    res.status(500).json({ error: 'Could not create the SQLite database backup.' });
+  }
+};
+
+module.exports = require('../storage/transaction').wrapControllers(module.exports);

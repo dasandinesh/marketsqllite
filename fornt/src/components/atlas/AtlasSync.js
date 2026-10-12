@@ -148,7 +148,7 @@ export default function AtlasSync() {
       </section>
 
       {status?.lastError && <p className="atlas-notice atlas-notice-error" role="status">{status.lastError}</p>}
-      {status && !status.localConnected && <p className="atlas-notice atlas-notice-error">Local MongoDB is disconnected. Start it to save business data and sync with Atlas.</p>}
+      {status && !status.localConnected && <p className="atlas-notice atlas-notice-error">The local database is disconnected. Start the backend to save business data and sync with Atlas.</p>}
 
       <section className="atlas-card">
         <h2>Atlas connection</h2>
@@ -177,7 +177,7 @@ export default function AtlasSync() {
       <section className="atlas-card">
         <h2>How your data stays in sync</h2>
         <ul className="atlas-explanation">
-          <li>Without internet, work continues in local MongoDB. Changes are retried while the backend is running.</li>
+          <li>Without internet, work continues in local {status?.localEngine === 'sqlite' ? 'SQLite' : 'MongoDB'}. Changes are retried while the backend is running.</li>
           <li>New records merge in both directions. Updates and deletions sync after a shared version has been recorded.</li>
           <li>If both sides change the same record, sync holds that record for your review. Bill number counters keep the higher value.</li>
           <li>Sync copies deletions too. Keep historical backups using <Link to="/dashboard">file backups</Link> or Atlas backup settings.</li>

@@ -20,6 +20,6 @@ const vehicleSchema = new mongoose.Schema({
 
 vehicleSchema.index({ name: 1 });
 
-const VehicleModel = mongoose.model('Vehicle', vehicleSchema);
+const VehicleModel = require('../storage/model')('Vehicle', vehicleSchema);
 
 module.exports = VehicleModel;

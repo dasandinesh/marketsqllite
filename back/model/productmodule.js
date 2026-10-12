@@ -49,7 +49,7 @@ const productSchema = new mongoose.Schema({
 productSchema.index({ name: 1 });
 
 // Default global model (legacy)
-const ProductModel = mongoose.model('Product', productSchema);
+const ProductModel = require('../storage/model')('Product', productSchema);
 // Expose schema for tenant-aware binding
 ProductModel.productSchema = productSchema;
 

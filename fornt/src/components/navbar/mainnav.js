@@ -125,6 +125,9 @@ const MainNav = () => {
         ))}
         <NavDropdown id="price" label="Price" icon="pencil" links={PRICE_LINKS} onNavigate={close} openId={openDropdown} onToggle={toggleDropdown} />
         <NavDropdown id="accounts" label="Accounts" icon="wallet" links={ACCOUNT_LINKS} onNavigate={close} openId={openDropdown} onToggle={toggleDropdown} />
+        <NavLink to="/preferences" className={linkClass} onClick={close}>
+          <NavIcon name="gear" /><span>Preferences</span>
+        </NavLink>
       </div>
 
     

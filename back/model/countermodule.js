@@ -6,7 +6,7 @@ const counterSchema = new mongoose.Schema({
   seq: { type: Number, default: 0 },
 });
 
-const CounterModel = mongoose.model('Counter', counterSchema);
+const CounterModel = require('../storage/model')('Counter', counterSchema);
 
 // Atomically bump a sequence and return the new value.
 CounterModel.next = async function next(name) {

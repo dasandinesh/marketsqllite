@@ -47,4 +47,4 @@ const orderSchema = new mongoose.Schema({
 
 orderSchema.index({ 'bill_details.date': -1, 'bill_details.order_sno': 1 });
 
-module.exports = mongoose.model('Order', orderSchema);
+module.exports = require('../storage/model')('Order', orderSchema);

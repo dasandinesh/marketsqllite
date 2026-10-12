@@ -13,6 +13,19 @@ coverage/
 !*.env.example
 !.env.example
 .atlas-sync/
+.atlas-sync-sqlite/
+.preferences/
+.market-updates/
+back/data/
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+*.sqlite3
+*.sqlite3-wal
+*.sqlite3-shm
+*.db
+*.db-wal
+*.db-shm
 
 # Logs and editor files
 *.log

@@ -49,4 +49,4 @@ const saleSchema = new mongoose.Schema({
 
 saleSchema.index({ 'bill_details.date': -1, 'bill_details.order_sno': 1 });
 
-module.exports = mongoose.model('Sale', saleSchema);
+module.exports = require('../storage/model')('Sale', saleSchema);

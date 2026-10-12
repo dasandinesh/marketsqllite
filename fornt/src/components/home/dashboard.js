@@ -191,6 +191,7 @@ const Dashboard = () => {
   // Frontend: this component rendering at all means the React app is up — always green.
   const [backendState, setBackendState] = useState('pending');
   const [dbState, setDbState] = useState('pending');
+  const [dbEngine, setDbEngine] = useState('');
   const [checking, setChecking] = useState(true);
   const [lastChecked, setLastChecked] = useState(null);
 
@@ -207,6 +208,7 @@ const Dashboard = () => {
       const data = await response.json();
       setBackendState('ok');
       setDbState(data.db ? 'ok' : 'bad');
+      setDbEngine(data.engine || 'mongodb');
     } catch {
       // Backend unreachable — database status can't be confirmed either.
       setBackendState('bad');
@@ -223,11 +225,11 @@ const Dashboard = () => {
     return () => clearInterval(timer);
   }, [checkHealth]);
 
-  const downloadBackup = async () => {
+  const downloadBackup = async (nativeSQLite = false) => {
     setDownloading(true);
     setBackupStatus({ type: '', text: '' });
     try {
-      const response = await fetch('/api/backup/download');
+      const response = await fetch(nativeSQLite ? '/api/backup/download-sqlite' : '/api/backup/download');
       if (!response.ok) {
         const data = await response.json().catch(() => ({}));
         throw new Error(data.error || `Backup download failed (${response.status}).`);
@@ -315,7 +317,7 @@ const Dashboard = () => {
           <StatusLight
             label="Database"
             state={dbState}
-            detail={dbState === 'pending' ? 'Checking…' : dbState === 'ok' ? 'Connected' : 'Disconnected'}
+            detail={dbState === 'pending' ? 'Checking…' : dbState === 'ok' ? `${dbEngine === 'sqlite' ? 'SQLite' : 'MongoDB'} connected` : 'Disconnected'}
           />
         </div>
 
@@ -334,9 +336,12 @@ const Dashboard = () => {
         </header>
 
         <div className="backup-actions">
-          <button type="button" className="dashboard-refresh" onClick={downloadBackup} disabled={downloading}>
+          <button type="button" className="dashboard-refresh" onClick={() => downloadBackup()} disabled={downloading}>
             {downloading ? 'Preparing…' : 'Download backup'}
           </button>
+          {dbEngine === 'sqlite' && <button type="button" className="dashboard-refresh" onClick={() => downloadBackup(true)} disabled={downloading || restoring}>
+            Download SQLite file
+          </button>}
           <button
             type="button"
             className="dashboard-refresh dashboard-refresh-danger"

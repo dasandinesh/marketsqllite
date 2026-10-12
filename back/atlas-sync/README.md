@@ -1,10 +1,10 @@
 # Atlas Sync
 
-Independent two-way sync for this app's **one local installation** and one customer-owned Atlas database. The existing local Mongoose connection and file backup/restore continue to operate separately. No Atlas connection is configured by default.
+Independent two-way sync for this app's **one local installation** and one customer-owned Atlas database. The local store can be MongoDB or the SQLite desktop edition. File backup/restore operates separately. No Atlas connection is configured by default. For SQLite launch and storage details, see the [SQLite guide](../storage/README.md).
 
 ## Setup
 
-1. Start local MongoDB and the backend normally (`npm start` in `back`).
+1. Start the selected local database and backend: MongoDB with `npm start`, or SQLite with `npm run start:sqlite` in `back`.
 2. In the app, open **Master → Atlas Sync** (`/atlas-sync`).
 3. Create a dedicated Atlas database user with `readWrite` access to the chosen database. Sync needs permission to read/write records, list collections, and create the app's indexes. Allow the backend computer's public IP in Atlas Network Access. Update that allowance if the public IP changes.
 4. Paste the Atlas SRV connection string (`mongodb+srv://USER:PASSWORD@CLUSTER.mongodb.net/?retryWrites=true&w=majority`). Replace placeholders; percent-encode special characters in username/password. Enter the destination database name separately.
@@ -21,6 +21,7 @@ The initial sync merges records by `_id`: local-only records upload; Atlas-only 
 - Optional `ATLAS_SYNC_DATA_DIR` selects a different absolute settings directory. Protect custom directories and exclude them from source control too.
 - Only the non-secret hostname/database/status are returned to the page. Driver errors and connection credentials are not exposed by the API. Only password-authenticated Atlas SRV URLs with verified TLS and supported connection options are accepted.
 - Sync bookkeeping and conflict snapshots live in the separate local database `market_atlas_sync_metadata`. The local MongoDB user needs read/write access to this database in addition to the app database. Keep it if you want to preserve deletion history and sync progress across reinstallations. The normal file backup does not include it.
+- In SQLite mode, bookkeeping and conflict snapshots are stored in the SQLite file's metadata namespace. Credentials are in `.atlas-sync-sqlite/` by default. Business JSON exports exclude metadata; native SQLite backups include it.
 - By default, Atlas administration accepts loopback requests and rejects non-local browser origins for settings access. To administer from other computers, set a strong `ATLAS_SYNC_ADMIN_TOKEN` in the backend environment/config file and restart the backend, then enter that token on the Atlas page. Once configured, the token is required even locally. Use HTTPS when exposing the app beyond a trusted local computer/network. This feature does not add user accounts or tenant isolation to the rest of the app.
 
 Disconnecting removes the saved connection and stops automatic checks; it keeps both databases and sync metadata. Reconnecting to the same host/database resumes its checkpoints. Choosing another destination requires confirmation and uses separate checkpoints for a new merge.

@@ -14,7 +14,7 @@ const companySchema = new mongoose.Schema({
 }, { timestamps: true });
 
 // Default global model (legacy)
-const CompanyModel = mongoose.model('Company', companySchema);
+const CompanyModel = require('../storage/model')('Company', companySchema);
 
 
 module.exports = CompanyModel;

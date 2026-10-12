@@ -1,10 +1,14 @@
 {
   "name": "my-backend",
-  "version": "1.0.0",
+  "version": "1.2.0",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "node --watch server.js"
+    "dev": "node --watch server.js",
+    "start:sqlite": "node desktop-launcher.js",
+    "dev:sqlite": "node --watch sqlite-server.js",
+    "test:sqlite": "node --test storage/*.test.js",
+    "test:updates": "node --test updates/*.test.js"
   },
   "dependencies": {
     "bson": "^6.10.4",
@@ -12,6 +16,7 @@
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
-    "mongoose": "^8.24.4"
+    "mongoose": "^8.24.4",
+    "yauzl": "3.4.0"
   }
 }

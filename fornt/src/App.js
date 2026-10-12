@@ -24,6 +24,7 @@ import DriverList from './components/driver/driverlist';
 import VehicleAdd from './components/vehicle/vehicleadd';
 import VehicleList from './components/vehicle/vehiclelist';
 import AtlasSync from './components/atlas/AtlasSync';
+import Preferences from './components/preferences/Preferences';
 import './responsive.css';
 
 // Select an input's value when it gets focus, so typing replaces it without Backspace.
@@ -80,6 +81,7 @@ function App() {
             <Route path="/receipts" element={<ReceiptEntry />} />
             <Route path="/customer-ledger" element={<CustomerLedger />} />
             <Route path="/atlas-sync" element={<AtlasSync />} />
+            <Route path="/preferences" element={<Preferences />} />
           </Routes>
       </AppLayout>
     </Router>

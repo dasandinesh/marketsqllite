@@ -31,7 +31,8 @@ function validateConnection(uri, database) {
 }
 
 class ConfigStore {
-  constructor(directory = process.env.ATLAS_SYNC_DATA_DIR || path.join(__dirname, '../.atlas-sync')) {
+  constructor(directory = process.env.ATLAS_SYNC_DATA_DIR || path.join(__dirname,
+    require('../storage').engine() === 'sqlite' ? '../.atlas-sync-sqlite' : '../.atlas-sync')) {
     this.directory = directory;
     this.filename = path.join(directory, 'connection.json');
   }

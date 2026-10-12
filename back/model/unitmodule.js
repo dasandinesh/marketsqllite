@@ -28,4 +28,4 @@ unitSchema.pre('validate', function () {
   }
 });
 
-module.exports = mongoose.models.Unit || mongoose.model('Unit', unitSchema);
+module.exports = require('../storage/model')('Unit', unitSchema);

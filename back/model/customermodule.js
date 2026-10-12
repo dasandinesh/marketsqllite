@@ -14,7 +14,7 @@ const customerSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 // Default global model (legacy)
-const CustomerModel = mongoose.model('Customer', customerSchema);
+const CustomerModel = require('../storage/model')('Customer', customerSchema);
 
 
 module.exports = CustomerModel;

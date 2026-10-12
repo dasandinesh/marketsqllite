@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const storage = require('../storage');
 const { EJSON } = require('bson');
 const { ConfigStore, validateConnection } = require('./config');
 const { hash, recordKey, decide, apply } = require('./reconcile');
@@ -18,8 +19,8 @@ function publicError(error) {
 }
 
 class AtlasSyncService {
-  constructor({ store = new ConfigStore(), getLocalDb = () => mongoose.connection.readyState === 1 ? mongoose.connection.db : null,
-    getMetadataDb = () => mongoose.connection.getClient().db('market_atlas_sync_metadata'),
+  constructor({ store = new ConfigStore(), getLocalDb = storage.localDb,
+    getMetadataDb = storage.metadataDb,
     createClient = uri => new mongoose.mongo.MongoClient(uri, {
       tls: true, serverSelectionTimeoutMS: 7000, connectTimeoutMS: 7000, socketTimeoutMS: 15000,
       maxPoolSize: 3, readPreference: 'primary', writeConcern: { w: 'majority' },
@@ -69,7 +70,7 @@ class AtlasSyncService {
     }
     return { configured: Boolean(config), host: config?.host || '', database: config?.database || '',
       enabled: config?.enabled || false, connection: config && this.connection === 'not-configured' ? 'waiting' : this.connection, running: this.running,
-      localConnected: Boolean(db), pending, conflicts, lastSyncAt: run?.lastSyncAt || null,
+      localConnected: Boolean(db), localEngine: storage.engine(), pending, conflicts, lastSyncAt: run?.lastSyncAt || null,
       lastAttemptAt: run?.lastAttemptAt || null, lastError: this.lastError,
       intervalSeconds: this.intervalMs / 1000, collections: this.collections };
   }
@@ -144,6 +145,8 @@ class AtlasSyncService {
       $set: { target: metadata.target, key, collection: name, documentId: id, baseHash, pending: false },
       $unset: { conflict: '' },
     }, { upsert: true });
+    const local = this.getLocalDb();
+    if (local?.acknowledge) await local.acknowledge(name, id, baseHash);
   }
 
   async conflict(metadata, name, key, id, local, cloud, message = '') {
@@ -181,7 +184,7 @@ class AtlasSyncService {
     const config = this.config();
     if (!config) throw new SyncError('Save an Atlas connection first.');
     const db = this.getLocalDb();
-    if (!db) throw new SyncError('Local MongoDB is disconnected. Start it before syncing.', 503);
+    if (!db) throw new SyncError('The local database is disconnected. Start it before syncing.', 503);
     this.running = true;
     this.connection = 'connecting';
     this.lastError = '';

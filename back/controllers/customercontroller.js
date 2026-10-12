@@ -72,3 +72,5 @@ exports.deleteCustomer = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+
+module.exports = require('../storage/transaction').wrapControllers(module.exports);

@@ -15,4 +15,4 @@ const receiptSchema = new mongoose.Schema({
 
 receiptSchema.index({ 'customer.name': 1, date: -1 });
 
-module.exports = mongoose.model('Receipt', receiptSchema);
+module.exports = require('../storage/model')('Receipt', receiptSchema);
