@@ -41,6 +41,7 @@ const SaleEntry = () => {
     const bagRateInputRef = useRef(null);
     const wageInputRef = useRef(null);
     const commissionInputRef = useRef(null);
+    const saleSummaryContentRef = useRef(null);
 
     const [customerList, setCustomerList] = useState([]);
     const [productList, setProductList] = useState([]);
@@ -181,6 +182,23 @@ const SaleEntry = () => {
     const [viewSale, setViewSale] = useState(null); // sale shown in the read-only details popup.
     const [viewOrderBill, setViewOrderBill] = useState(null); // order shown in the read-only details popup.
     const [selectedRow, setSelectedRow] = useState(-1); // highlighted row in the summary list.
+
+    useEffect(() => {
+        const list = saleSummaryContentRef.current;
+        const row = list?.querySelector('.sale-row-selected');
+        if (!row) return;
+
+        // Scroll only this list, keeping the selected row fully visible.
+        const listBounds = list.getBoundingClientRect();
+        const rowBounds = row.getBoundingClientRect();
+        const visibleTop = listBounds.top + list.clientTop;
+        const visibleBottom = visibleTop + list.clientHeight;
+        if (rowBounds.bottom > visibleBottom) {
+            list.scrollTop += rowBounds.bottom - visibleBottom;
+        } else if (rowBounds.top < visibleTop) {
+            list.scrollTop += rowBounds.top - visibleTop;
+        }
+    }, [selectedRow, saleSummary]);
     const [customerWarning, setCustomerWarning] = useState(''); // set when a name is not in the customer list.
     const [productWarning, setProductWarning] = useState(''); // set when a name is not in the product list.
 
@@ -325,7 +343,7 @@ const SaleEntry = () => {
     };
 
     // Load an existing sale from the summary list back into the form for editing.
-    const handleEdit = (sale) => {
+    const handleEdit = (sale, scrollToForm = true) => {
         setEditingId(sale._id);
         setIsSubscribed(Boolean(sale.bill_details?.billed));
         setSaveStatus('');
@@ -353,7 +371,7 @@ const SaleEntry = () => {
                 commission: item.commission ?? "",
             })),
         });
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        if (scrollToForm) window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
     // Turn an order (purchase) bill into a fresh sale — pulls the customer and product
@@ -401,7 +419,7 @@ const SaleEntry = () => {
             const next = e.key === 'ArrowDown'
                 ? Math.min(base + 1, saleSummary.length - 1)
                 : Math.max(base - 1, 0);
-            handleEdit(saleSummary[next]);
+            handleEdit(saleSummary[next], false);
             return next;
         });
     };
@@ -1058,6 +1076,7 @@ const SaleEntry = () => {
                 </div>
                 <div
                     className="sale-summary-content"
+                    ref={saleSummaryContentRef}
                     tabIndex={0}
                     onKeyDown={handleSummaryKeyDown}
                 >
