@@ -12,7 +12,7 @@ function within(parent, ...parts) {
   if (relative.startsWith('..') || path.isAbsolute(relative)) throw new UpdateError('Invalid update file location.');
   return target;
 }
-function updateDirectory(root) { return within(root, '.market-updates'); }
+function updateDirectory(root) { return process.env.MARKET_UPDATE_DATA_DIR ? path.resolve(process.env.MARKET_UPDATE_DATA_DIR) : within(root, '.market-updates'); }
 function readJSON(filename, fallback = null) {
   try { return JSON.parse(fs.readFileSync(filename, 'utf8')); }
   catch (error) { if (error.code === 'ENOENT') return fallback; throw new UpdateError('An update settings file is invalid.', 500); }

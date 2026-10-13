@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { fetchJson } from '../../api';
+import { handlePriceRowEnter } from '../common/priceNavigation';
 import './price.css';
 
 const todayString = () => {
@@ -144,6 +145,8 @@ const ByBillSection = () => {
                                                 type="number"
                                                 step="0.01"
                                                 value={row.price}
+                                                data-price-column="price"
+                                                onKeyDown={handlePriceRowEnter}
                                                 onChange={(e) => editRow(index, 'price', e.target.value)}
                                                 onBlur={() => saveRow(index)}
                                             />
@@ -152,6 +155,8 @@ const ByBillSection = () => {
                                             <input
                                                 type="number"
                                                 value={row.quantity}
+                                                data-price-column="quantity"
+                                                onKeyDown={handlePriceRowEnter}
                                                 onChange={(e) => editRow(index, 'quantity', e.target.value)}
                                                 onBlur={() => saveRow(index)}
                                             />
@@ -273,6 +278,8 @@ const BulkPriceSection = () => {
                                             type="number"
                                             step="0.01"
                                             value={row.price}
+                                            data-price-column="price"
+                                            onKeyDown={handlePriceRowEnter}
                                             onChange={(e) => editProductRow(index, e.target.value)}
                                             onBlur={() => saveProductRow(index)}
                                         />

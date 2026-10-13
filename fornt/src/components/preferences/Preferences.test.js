@@ -34,3 +34,11 @@ test('unmanaged desktop instances explain how to enable installation', async () 
   expect(await screen.findByText(/managed SQLite desktop edition/)).toBeInTheDocument();
   expect(screen.getByRole('button', { name: 'Prepare Update' })).toBeDisabled();
 });
+
+test('the installed desktop edition downloads installers without asking customers for development tools', async () => {
+  fetchJson.mockResolvedValue({ ...base, packaged: true });
+  render(<Preferences />);
+  expect(await screen.findByRole('button', { name: 'Download Update' })).toBeEnabled();
+  expect(screen.getByText(/ready-made Windows installer/)).toBeInTheDocument();
+  expect(screen.getByText(/reinstall the previous desktop version/)).toBeInTheDocument();
+});

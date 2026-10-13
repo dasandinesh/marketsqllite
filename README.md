@@ -2,6 +2,8 @@
 
 The SQLite desktop edition is maintained at [dasandinesh/marketsqllite](https://github.com/dasandinesh/marketsqllite). The original MongoDB/cloud project is at [dasandinesh/market](https://github.com/dasandinesh/market).
 
+For a Windows 10/11 x64 one-click installer with bundled runtime, desktop shortcut and installer-based updates, see the [Windows desktop guide](desktop/README.md). Customer data stays in `%APPDATA%\Market Billing`, outside installed software. Building/publishing installers is a publisher step; customers do not need development tools.
+
 React frontend in `fornt/` and an Express backend in `back/`, with MongoDB/cloud and SQLite/local storage profiles. Features include customer/product management, orders, sales, receipts, ledgers, bill previews/PDF sharing, file backup/restore, and optional synchronization to MongoDB Atlas.
 
 For the SQLite desktop edition, use Node.js 24+:

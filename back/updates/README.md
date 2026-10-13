@@ -1,5 +1,7 @@
 # Desktop software updates
 
+This guide describes source installations launched with `npm run start:sqlite`. For the Windows one-click installer and updates without development tools on customer PCs, use the [packaged desktop guide](../../desktop/README.md). Installer updates require GitHub Release assets as well as the source version.
+
 This updater is for the SQLite edition served on localhost. It updates application code; Atlas sync transfers business records separately. The MongoDB/cloud server and the development watch command cannot install updates from this page.
 
 ## Customer steps
@@ -19,18 +21,19 @@ The SQLite edition is maintained in `https://github.com/dasandinesh/marketsqllit
 For each new version:
 
 1. Keep the complete application source, both package-lock files, launcher/updater, SQLite adapter and Preferences page in the repository. Never commit customer databases, private environment files or connection keys.
-2. Increase the three-part version in the root `market-update.json` and `back/package.json`; update the root version in `back/package-lock.json` too. For example, change `1.2.0` to `1.2.1`.
+2. Increase the three-part version in the root `market-update.json`, `back/package.json` and `desktop/package.json`; update the root versions in both package-lock files too. For example, change `1.3.1` to `1.3.2`.
 3. Keep `application: "market-billing"`, `protocol: 1`, `databaseSchema: 1`, and `minimumNodeMajor: 24` for compatible updates. Raise the minimum Node version if required. Database schema changes need a separately designed migration and recovery plan; this updater rejects another schema version.
 4. Run the backend tests and production frontend build, commit and push the source. Publish a stable GitHub Release for that tested commit if desired. The updater selects the latest stable release; if there are no releases, it checks the default branch. Once stable releases exist, publish a new release for updates rather than relying on changes to the default branch.
 
 Checks resolve the release/branch to a full commit SHA. Preparation downloads that exact commit and verifies its manifest, installs locked dependencies, builds the frontend, and starts it against a temporary empty SQLite database. Passing these checks does not guarantee every business workflow is correct; the provider must test its changes before publishing.
 
-For example, to publish the next version `1.2.1`, change the manifest's version to `1.2.1`, then run from the project root:
+For example, to publish the next source version `1.3.2`, change the manifest's version to `1.3.2`, then run from the project root:
 
 ```powershell
-npm --prefix back version 1.2.1 --no-git-tag-version
+npm --prefix back version 1.3.2 --no-git-tag-version
+npm --prefix desktop version 1.3.2 --no-git-tag-version
 git add .
-git commit -m "Release SQLite desktop version 1.2.1"
+git commit -m "Release SQLite desktop version 1.3.2"
 git push origin main
 ```
 

@@ -1,0 +1,57 @@
+name: Windows desktop release
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: |
+            desktop/package-lock.json
+            fornt/package-lock.json
+      - name: Install build dependencies
+        shell: pwsh
+        run: |
+          npm --prefix fornt ci
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          npm --prefix desktop ci
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node desktop/node_modules/electron/install.js
+          exit $LASTEXITCODE
+      - name: Validate release version
+        shell: pwsh
+        run: |
+          if ($env:GITHUB_REF_TYPE -eq 'tag') {
+            $taskVersion = (Get-Content market-update.json | ConvertFrom-Json).version
+            if ($env:GITHUB_REF_NAME -ne "v$taskVersion") { throw 'Tag must match market-update.json version.' }
+          }
+      - name: Test desktop controls
+        run: npm --prefix desktop test
+      - name: Build Windows installer
+        run: npm --prefix desktop run build:win
+      - name: Check packaged app and data persistence
+        run: npm --prefix desktop run test:packaged
+      - uses: actions/upload-artifact@v4
+        with:
+          name: market-windows-installer
+          path: |
+            dist/desktop/*.exe
+            dist/desktop/*.exe.blockmap
+            dist/desktop/latest.yml
+      - name: Publish stable release
+        if: github.ref_type == 'tag'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: pwsh
+        run: |
+          $taskFiles = @(Get-ChildItem dist/desktop/*.exe, dist/desktop/*.exe.blockmap, dist/desktop/latest.yml | ForEach-Object FullName)
+          gh release create $env:GITHUB_REF_NAME @taskFiles --verify-tag --title "Market Billing $env:GITHUB_REF_NAME" --generate-notes
+          exit $LASTEXITCODE

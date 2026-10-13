@@ -98,4 +98,5 @@ class PreferencesService {
     return this.status();
   }
 }
-module.exports = { PreferencesService, service: new PreferencesService() };
+module.exports = { PreferencesService, service: process.env.MARKET_DESKTOP === '1'
+  ? new (require('./desktop-service').DesktopPreferences)() : new PreferencesService() };

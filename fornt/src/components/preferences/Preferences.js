@@ -67,7 +67,9 @@ export default function Preferences() {
     </section>
     <section className="preferences-card">
       <h2>Software updates</h2>
-      <p>Enter the public GitHub repository supplied by your software provider. Updates are prepared separately before your current app is restarted.</p>
+      <p>{status?.packaged
+        ? 'Enter the public GitHub repository supplied by your software provider. Desktop updates download a ready-made Windows installer; no Node.js or npm installation is required.'
+        : 'Enter the public GitHub repository supplied by your software provider. Updates are prepared separately before your current app is restarted.'}</p>
       <form onSubmit={event => { event.preventDefault(); void perform('save', '/repository', { repository: repository.trim() }); }}>
         <label htmlFor="update-repository">GitHub repository link</label>
         <input id="update-repository" type="url" value={repository} onChange={event => setRepository(event.target.value)}
@@ -78,8 +80,9 @@ export default function Preferences() {
             onClick={() => perform('check', '/check', {})}>{busy === 'check' ? 'Checking…' : 'Check for Updates'}</button>
         </div>
       </form>
-      {status && !status.canInstall && <p className="preferences-notice info">Software installation is available in the managed SQLite desktop edition.
-        Start it with <code>npm run start:sqlite</code> on the local computer.</p>}
+      {status && !status.canInstall && <p className="preferences-notice info">{status.packaged
+        ? 'Installer updates are available after installing the packaged desktop application.'
+        : <>Software installation is available in the managed SQLite desktop edition. Start it with <code>npm run start:sqlite</code> on the local computer.</>}</p>}
       {status?.latest && <div className="preferences-release">
         <div><h3>{status.latest.name}</h3><span>Version {status.latest.manifest.version}</span></div>
         <p>{status.updateAvailable ? 'A newer compatible version is available.' : 'Your installed version is current or newer.'}</p>
@@ -87,7 +90,7 @@ export default function Preferences() {
         <a href={status.latest.url} target="_blank" rel="noreferrer">View update on GitHub</a>
         {status.updateAvailable && !prepared && <div className="preferences-actions"><button type="button" className="primary"
           disabled={working || !status.canInstall || repositoryChanged} onClick={() => perform('prepare', '/prepare', { commit: status.latest.commit })}>
-          Prepare Update</button></div>}
+          {status.packaged ? 'Download Update' : 'Prepare Update'}</button></div>}
       </div>}
       {status?.job && <div className="preferences-job" role="status">
         <strong>Update {status.job.version} · {status.job.phase.replaceAll('-', ' ')}</strong>
@@ -102,7 +105,9 @@ export default function Preferences() {
     <section className="preferences-card"><h2>What an update preserves</h2><ul>
       <li>Your SQLite billing database is backed up before the app restarts.</li>
       <li>Database location, private configuration and Atlas connection settings stay outside downloaded application versions.</li>
-      <li>If the new version fails its startup check, the launcher attempts to restore the previous app and database.</li>
+      <li>{status?.packaged
+        ? 'Installer updates retain a database recovery backup. If an installed version cannot start, recover the backup and reinstall the previous desktop version.'
+        : 'If the new version fails its startup check, the launcher attempts to restore the previous app and database.'}</li>
     </ul></section>
     <details className="preferences-card"><summary>Settings access key</summary>
       <p>If this computer has a settings access key, enter it here. It is kept only in this page’s memory.</p>
